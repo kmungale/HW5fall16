@@ -46,8 +46,9 @@ Given /^I am on the RottenPotatoes home page$/ do
 # Add a declarative step here for populating the DB with movies.
 
 Given /the following movies have been added to RottenPotatoes:/ do |movies_table|
-  pending  # Remove this statement when you finish implementing the test step
+  # Remove this statement when you finish implementing the test step
   movies_table.hashes.each do |movie|
+      Movie.create! movie
     # Each returned movie will be a hash representing one row of the movies_table
     # The keys will be the table headers and the values will be the row contents.
     # Entries can be directly to the database with ActiveRecord methods
@@ -59,16 +60,44 @@ When /^I have opted to see movies rated: "(.*?)"$/ do |arg1|
   # HINT: use String#split to split up the rating_list, then
   # iterate over the ratings and check/uncheck the ratings
   # using the appropriate Capybara command(s)
-  pending  #remove this statement after implementing the test step
+  Movie.all_ratings.each do |rating|
+     uncheck "ratings_#{rating}" 
+  end      
+  selectedRatings = arg1.split(/\s*,\s*/)
+  selectedRatings.each do |rating|
+      check("ratings_#{rating}")
+  end      
+  click_button "ratings_submit"
+   #remove this statement after implementing the test step
+end
+
+When(/^I follow "(.*?)"$/) do |arg1|
+  click_on arg1    
+  # express the regexp above with the code you wish you had
 end
 
 Then /^I should see only movies rated: "(.*?)"$/ do |arg1|
-  pending  #remove this statement after implementing the test step
+    #remove this statement after implementing the test step
+  result = false
+  arg1.split(/\s*,\s*/).each do |rating|
+      all('table#movies tbody tr').each do |row|
+        if(row.has_content? rating )
+            result =  true
+        end    
+      end
+  end      
+  
 end
 
 Then /^I should see all of the movies$/ do
-  pending  #remove this statement after implementing the test step
+  (all('table#movies tbody tr').length).should eq Movie.count  #remove this statement after implementing the test step
 end
 
-
+Then /^I should see "(.*)" before "(.*)"$/ do |arg1, arg2|
+  result = false
+  if(page.body =~ /#{arg1}.+#{arg2}/m)
+    result = true
+  end
+  expect(result).to be_truthy
+end
 
